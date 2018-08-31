@@ -6,6 +6,7 @@ var percentageToColor2 = require("../percentageToColor").blue;
 
 var element = document.getElementById("sigma-modules");
 
+var modules = {};
 var nodes = [];
 var edges = [];
 var moduleCount = app.stats.modules.length;
@@ -15,6 +16,7 @@ var maxSize = 0;
 app.stats.modules.forEach(function(module, idx) {
 	if(module.size > maxSize) maxSize = module.size;
 	if(module.timestamp > maxTimestamp) maxTimestamp = module.timestamp;
+	modules[module.name] = module.uid;
 });
 app.stats.modules.forEach(function(module, idx) {
 	var color = percentageToColor(Math.pow((module.size+1) / (maxSize+1), 1/4));
@@ -26,6 +28,7 @@ app.stats.modules.forEach(function(module, idx) {
 		return true;
 	});
 	var uid = module.uid;
+	if (/.*\/node_modules\/.*/.test(module.name)) return;
 	nodes.push({
 		id: "module" + uid,
 		uid: uid,
@@ -46,6 +49,8 @@ app.stats.modules.forEach(function(module, idx) {
 		var parentIdent = reason.moduleIdentifier;
 		var parentModule = app.mapModulesIdent["$"+parentIdent];
 		if(!parentModule) return;
+		const name = parentModule.name.split('!').slice(-1)[0];
+		parentModule.uid = modules[name]
 		var weight = 1 / uniqueReasons.length / uniqueReasons.length;
 		var async = !module.chunks.some(function(chunk) {
 			return (function isInChunks(chunks, checked) {
