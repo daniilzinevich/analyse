@@ -86,7 +86,12 @@ app.stats.modules.forEach(function(module, idx) {
 var s = new sigma({
 	graph: {
 		nodes: nodes,
-		edges: edges
+		edges: edges.reduce((prev, curr) => {
+	    if(nodes.find(item => item.uid==curr.sourceModule.uid) && nodes.find(item => item.uid==curr.targetModule.uid)) {
+				prev.push(curr);
+	    }
+			return prev;
+		}, [])
 	},
 	renderer: {
 		type: "canvas",
